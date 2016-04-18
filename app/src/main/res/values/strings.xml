@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">One plus One</string>
+    <string name="facebook_app_id">1685529555056523</string>
+    <string name="hello">Hello</string>
+    <string name="dialog_msg">"You are logged as "</string>
+    <string name="et_hint">Name or Image link</string>
+    <string name="et_second_hint">Enter Text</string>
+    <string name="dialog_login_btn_approve_txt">Yes!</string>
+    <string name="dialog_login_logout_btn_txt">Log out</string>
+    <string name="share_success_msg">Hooray! you shared your equation</string>
+    <string name="share_error_msg">It seems something went wrong..</string>
+    <string name="share_cancel_msg">Sharing process canceled</string>
+    <string name="login_dialog_title">Welcome!</string>
+    <string name="cuntinue_msg">Do you wish to continue?</string>
+    <string name="dialog_share_title_txt">Share Screen Shot</string>
+    <string name="dialog_share_msg_txt">Share image to Facebook?</string>
+</resources>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar
+    android:id="@+id/share_toolbar"
+    android:background="@android:color/holo_blue_dark"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:elevation="4dp"
+    android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+    android:layout_height="?attr/actionBarSize"
+    android:gravity="center"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="Build your funny equation NOW!"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/toolbar_share_btn"
+            android:textColor="@color/btn_color"
+            android:layout_marginRight="@dimen/toolbar_share_btn_right_margin"
+            android:layout_centerInParent="true"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/textview_shape"
+            android:padding="8dp"
+            android:textSize="18sp"
+            android:textAllCaps="false"
+            android:text="@string/com_facebook_share_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+
+
+
+
+</android.support.v7.widget.Toolbar>

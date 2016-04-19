@@ -24,10 +24,12 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.HttpMethod;
 import com.facebook.Profile;
+import com.facebook.login.LoginManager;
 import com.facebook.share.ShareApi;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.SharePhoto;
@@ -45,6 +47,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 
 
 public class ShareActivity extends AppCompatActivity implements View.OnFocusChangeListener {
@@ -53,7 +56,7 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
     private TextView shareTv;
     private TableRow inputRow;
     private EditText pic1UrlEt, pic1TextEt, pic2UrlEt, pic2TextEt, pic3UrlEt, pic3TextEt;
-    private ImageView img1, img2, img3;
+    private ImageView img1, img2, img3, background_img;
     private Bitmap image;
     final private String MY_LOG = "myLog";
     private String friends;
@@ -64,9 +67,12 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_share);
-        toolbar = (Toolbar) findViewById(R.id.share_toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getUserFriends();
+
+        background_img= (ImageView) findViewById(R.id.share_background_img);
+//        Glide.with(this).load(R.drawable.background_1_plus_1).into(background_img);
+//        getUserFriends();
         inputRow = (TableRow) findViewById(R.id.input_row);
         shareTv = (TextView) findViewById(R.id.toolbar_share_btn);
         pic1UrlEt = (EditText) findViewById(R.id.img_1_url_et);
@@ -92,17 +98,17 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
         });
     }
 
-    private void getUserFriends() {
-        Intent callingIntent=getIntent();
-        if (callingIntent!=null){
-            try {
-                friendsList=new JSONObject(callingIntent.getStringExtra("friendsList"));
-                Log.i(MY_LOG,friendsList.toString());
-            } catch (JSONException e) {
-                Log.e(MY_LOG, "JSON error", e);
-            }
-        }
-    }
+//    private void getUserFriends() {
+//        Intent callingIntent=getIntent();
+//        if (callingIntent!=null){
+//            try {
+//                friendsList=new JSONObject(callingIntent.getStringExtra("friendsList"));
+//                Log.i(MY_LOG,friendsList.toString());
+//            } catch (JSONException e) {
+//                Log.e(MY_LOG, "JSON error", e);
+//            }
+//        }
+//    }
 
     private void postPicture() {
         Log.i("myLog", "in post picture");
@@ -157,44 +163,6 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
             }
         });
         dialog.show();
-//        AlertDialog.Builder shareDialog = new AlertDialog.Builder(this);
-//
-//        shareDialog.setTitle("Share Screen Shot");
-//        shareDialog.setMessage("Share image to Facebook?");
-//        shareDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int which) {
-//                //share the image to Facebook
-//                SharePhoto photo = new SharePhoto.Builder().setBitmap(image).build();
-//                SharePhotoContent content = new SharePhotoContent.Builder().addPhoto(photo).build();
-//                returnViews();
-//                ShareApi.share(content, new FacebookCallback<Sharer.Result>() {
-//                    @Override
-//                    public void onSuccess(Sharer.Result result) {
-//                        Log.i(MY_LOG, "share success");
-//                        Toast.makeText(ShareActivity.this, R.string.share_success_msg, Toast.LENGTH_LONG).show();
-//                    }
-//
-//                    @Override
-//                    public void onCancel() {
-//                        Log.i(MY_LOG, "share cancel");
-//                        Toast.makeText(ShareActivity.this, R.string.share_cancel_msg, Toast.LENGTH_LONG).show();
-//                    }
-//
-//                    @Override
-//                    public void onError(FacebookException error) {
-//                        Log.i(MY_LOG, "share error");
-//                        Toast.makeText(ShareActivity.this, R.string.share_error_msg, Toast.LENGTH_LONG).show();
-//                    }
-//                });
-//            }
-//        });
-//        shareDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int which) {
-//                returnViews();
-//                dialog.cancel();
-//            }
-//        });
-//        shareDialog.show();
     }
 
     private void removeViews() {
@@ -245,8 +213,13 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
     }
 
     private void getPicture(EditText picUrlEt, ImageView image) {
+
         try {
-            new PictureLoaderTask(picUrlEt, image).execute(new URL(picUrlEt.getText().toString()));
+            Glide.with(this).load(new URL(picUrlEt.getText().toString())).into(image);
+            image.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            picUrlEt.setWidth(80);
+            picUrlEt.setText("");
+//            new PictureLoaderTask(picUrlEt, image).execute(new URL(picUrlEt.getText().toString()));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -264,9 +237,8 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
             if (bitmap != null) {
-//                image.setBackground(null);
                 image.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                image.setImageBitmap(bitmap);
+//                image.setImageBitmap(bitmap);
                 et.setWidth(80);
                 et.setText("");
             } else{
@@ -280,8 +252,9 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
         protected Bitmap doInBackground(URL... params) {
             Bitmap bitmap = null;
             try {
+                Glide.with(ShareActivity.this).load(params[0]).into(image);
                 InputStream inputStream = (InputStream) params[0].getContent();
-                bitmap = BitmapFactory.decodeStream(inputStream);
+                bitmap = null;//BitmapFactory.decodeStream(inputStream);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (MalformedURLException e) {

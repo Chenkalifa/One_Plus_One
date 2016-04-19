@@ -13,5 +13,5 @@
     <string name="login_dialog_title">Welcome!</string>
     <string name="cuntinue_msg">Do you wish to continue?</string>
     <string name="dialog_share_title_txt">Share Screen Shot</string>
-    <string name="dialog_share_msg_txt">Share image to Facebook?</string>
+    <string name="dialog_share_msg_txt">Share image on Facebook?</string>
 </resources>

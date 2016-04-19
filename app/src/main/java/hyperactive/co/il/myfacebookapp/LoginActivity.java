@@ -3,6 +3,7 @@ package hyperactive.co.il.myfacebookapp;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.graphics.Bitmap;
@@ -22,12 +23,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
@@ -61,17 +63,17 @@ public class LoginActivity extends AppCompatActivity {
     private AccessTokenTracker accessTokenTracker;
     private ProfileTracker profileTracker;
     private Profile profile;
-    private ImageView user_img;
+    private ImageView background_img, user_img;
     private String friends;
     final private String MY_LOG = "myLog";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_login);
-
         AppEventsLogger.activateApp(this);
+//        background_img= (ImageView) findViewById(R.id.background);
+//        Glide.with(this).load(R.drawable.banner).into(background_img);
         profileTracker = new ProfileTracker() {
             @Override
             protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
@@ -88,15 +90,19 @@ public class LoginActivity extends AppCompatActivity {
         accessTokenTracker.startTracking();
         loginManager = LoginManager.getInstance();
         loginButton = (LoginButton) findViewById(R.id.login_button);
-        loginButton.setReadPermissions("user_friends");
+//        loginButton.setReadPermissions("user_friends");
+        loginButton.setPublishPermissions("publish_actions");
         callbackManager = CallbackManager.Factory.create();
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.i(MY_LOG, "success");
                 AccessToken accessToken = loginResult.getAccessToken();
-                Profile profile = Profile.getCurrentProfile();
+                profile = Profile.getCurrentProfile();
                 new UserFriendsRequestTask().execute(accessToken);
+                LoginManager.getInstance().logInWithPublishPermissions(
+                        LoginActivity.this,
+                        Arrays.asList("publish_actions"));
 //                new GraphRequest(
 //                        accessToken,
 //                        "/me/friends",
@@ -137,15 +143,16 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        profile = Profile.getCurrentProfile();
-        if (profile != null) {
+        if (isLoggedIn()){
+            profile=Profile.getCurrentProfile();
             openAlreadyLoggedDialog();
-        } else {
-
-            loginManager.logInWithPublishPermissions(
-                    this,
-                    Arrays.asList("publish_actions"));
         }
+
+    }
+
+    private boolean isLoggedIn() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        return accessToken != null;
     }
 
     @Override
@@ -168,17 +175,18 @@ public class LoginActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.login_dialog);
         user_img = (ImageView) dialog.findViewById(R.id.user_img);
         TextView dialogtxt = (TextView) dialog.findViewById(R.id.dialog_txt);
-        dialogtxt.setText(getString(R.string.dialog_msg) + profile.getFirstName()+"\n"+getString(R.string.cuntinue_msg));
+        dialogtxt.setText(getString(R.string.dialog_msg) + profile.getFirstName() + "\n" + getString(R.string.cuntinue_msg));
         Uri profilePictureUri = profile.getProfilePictureUri(80, 80);
-        new PictureLoaderTask().execute(profilePictureUri);
+        Glide.with(LoginActivity.this).load(profilePictureUri).into(user_img);
+//        new PictureLoaderTask().execute(profilePictureUri);
         Button ok = (Button) dialog.findViewById(R.id.ok_button);
         Button cancel = (Button) dialog.findViewById(R.id.cancel_button);
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new UserFriendsRequestTask().execute(AccessToken.getCurrentAccessToken());
-//                Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
-//                startActivity(intent);
+//                new UserFriendsRequestTask().execute(AccessToken.getCurrentAccessToken());
+                Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
+                startActivity(intent);
             }
         });
         cancel.setOnClickListener(new View.OnClickListener() {
@@ -232,14 +240,15 @@ public class LoginActivity extends AppCompatActivity {
         protected void onPostExecute(JSONObject jsonObject) {
             super.onPostExecute(jsonObject);
             if (jsonObject!=null){
-                try {
-                    friends=jsonObject.getJSONObject("friends").toString();
-                } catch (JSONException e) {
-                    Log.e(MY_LOG, "JSON error", e);
-                }
-                Log.i(MY_LOG, "friends="+friends);
+//                try {
+//
+//                    friends=jsonObject.getJSONObject("friends").toString();
+//                } catch (JSONException e) {
+//                    Log.e(MY_LOG, "JSON error", e);
+//                }
+//                Log.i(MY_LOG, "friends="+friends);
                     Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
-                    intent.putExtra("friendsList", friends);
+                    intent.putExtra("friendsList",  jsonObject.toString());
                     startActivity(intent);
             }
         }

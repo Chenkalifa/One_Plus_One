@@ -100,9 +100,9 @@ public class LoginActivity extends AppCompatActivity {
                 AccessToken accessToken = loginResult.getAccessToken();
                 profile = Profile.getCurrentProfile();
                 new UserFriendsRequestTask().execute(accessToken);
-                LoginManager.getInstance().logInWithPublishPermissions(
-                        LoginActivity.this,
-                        Arrays.asList("publish_actions"));
+//                LoginManager.getInstance().logInWithPublishPermissions(
+//                        LoginActivity.this,
+//                        Arrays.asList("publish_actions"));
 //                new GraphRequest(
 //                        accessToken,
 //                        "/me/friends",
@@ -143,8 +143,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (isLoggedIn()){
-            profile=Profile.getCurrentProfile();
+        profile=Profile.getCurrentProfile();
+        if (profile!=null){
+            Log.i(MY_LOG, "on resume profile="+profile.toString());
             openAlreadyLoggedDialog();
         }
 
@@ -175,9 +176,14 @@ public class LoginActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.login_dialog);
         user_img = (ImageView) dialog.findViewById(R.id.user_img);
         TextView dialogtxt = (TextView) dialog.findViewById(R.id.dialog_txt);
-        dialogtxt.setText(getString(R.string.dialog_msg) + profile.getFirstName() + "\n" + getString(R.string.cuntinue_msg));
-        Uri profilePictureUri = profile.getProfilePictureUri(80, 80);
-        Glide.with(LoginActivity.this).load(profilePictureUri).into(user_img);
+        if(profile!=null){
+            dialogtxt.setText(getString(R.string.dialog_msg) + profile.getFirstName() + "\n" + getString(R.string.cuntinue_msg));
+            Uri profilePictureUri = profile.getProfilePictureUri(80, 80);
+            Glide.with(LoginActivity.this).load(profilePictureUri).into(user_img);
+        } else {
+            Log.i(MY_LOG, "profile null");
+        }
+
 //        new PictureLoaderTask().execute(profilePictureUri);
         Button ok = (Button) dialog.findViewById(R.id.ok_button);
         Button cancel = (Button) dialog.findViewById(R.id.cancel_button);
@@ -211,8 +217,11 @@ public class LoginActivity extends AppCompatActivity {
                         public void onCompleted(
                                 JSONObject object,
                                 GraphResponse response) {
-                            Log.i(MY_LOG, "jsonObject="+object.toString());
-                            jsonResponse=object;
+                            if(object!=null){
+                                Log.i(MY_LOG, "jsonObject="+object.toString());
+                                jsonResponse=object;
+                            }
+
                         }
                     });
             Bundle parameters = new Bundle();

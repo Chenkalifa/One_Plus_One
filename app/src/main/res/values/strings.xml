@@ -14,4 +14,5 @@
     <string name="cuntinue_msg">Do you wish to continue?</string>
     <string name="dialog_share_title_txt">Share Screen Shot</string>
     <string name="dialog_share_msg_txt">Share image on Facebook?</string>
+    <string name="post_to_facebook_btn_text">Post to Facebook</string>
 </resources>

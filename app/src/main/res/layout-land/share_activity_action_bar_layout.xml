@@ -32,7 +32,7 @@
             android:padding="8dp"
             android:textSize="18sp"
             android:textAllCaps="false"
-            android:text="@string/com_facebook_share_button_text"
+            android:text="@string/post_to_facebook_btn_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </RelativeLayout>

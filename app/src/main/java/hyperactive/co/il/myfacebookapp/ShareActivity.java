@@ -114,10 +114,10 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
         Log.i("myLog", "in post picture");
         //save the screenshot
         removeViews();
-        View rootView = findViewById(R.id.activity_share_layout);//findViewById(android.R.id.content).getRootView()
+        final View rootView = findViewById(R.id.activity_share_layout);//findViewById(android.R.id.content).getRootView()
         rootView.setDrawingCacheEnabled(true);
-        image = Bitmap.createBitmap(rootView.getDrawingCache());
-        rootView.destroyDrawingCache();
+//        image = Bitmap.createBitmap(rootView.getDrawingCache());
+
 
         //share dialog
         final Dialog dialog = new Dialog(this);
@@ -130,7 +130,8 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
             @Override
             public void onClick(View v) {
                 //share the image to Facebook
-                SharePhoto photo = new SharePhoto.Builder().setBitmap(image).build();
+                SharePhoto photo = new SharePhoto.Builder().setBitmap(Bitmap.createBitmap(rootView.getDrawingCache())).build();
+                rootView.destroyDrawingCache();
                 SharePhotoContent content = new SharePhotoContent.Builder().addPhoto(photo).build();
                 returnViews();
                 ShareApi.share(content, new FacebookCallback<Sharer.Result>() {

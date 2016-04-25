@@ -56,11 +56,11 @@
             <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_3_txt_et" android:hint="@string/et_second_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
         </TableRow>
         <TableRow android:id="@+id/input_row">
-            <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_1_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size" />
+            <AutoCompleteTextView android:completionThreshold="1" android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_1_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size" />
             <TextView />
-            <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_2_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
+            <AutoCompleteTextView android:completionThreshold="1" android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_2_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
             <TextView />
-            <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_3_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
+            <AutoCompleteTextView android:completionThreshold="1" android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_3_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
         </TableRow>
 
     </TableLayout>

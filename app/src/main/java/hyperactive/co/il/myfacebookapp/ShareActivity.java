@@ -1,22 +1,18 @@
 package hyperactive.co.il.myfacebookapp;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -27,14 +23,11 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.HttpMethod;
 import com.facebook.Profile;
-import com.facebook.login.LoginManager;
 import com.facebook.share.ShareApi;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
-import com.facebook.share.widget.ShareButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,11 +37,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -57,14 +49,17 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
     private Profile profile;
     private TextView shareTv;
     private TableRow inputRow;
-    private EditText pic1UrlEt, pic1TextEt, pic2UrlEt, pic2TextEt, pic3UrlEt, pic3TextEt;
+    private AutoCompleteTextView pic1UrlEt, pic2UrlEt, pic3UrlEt;
+    private EditText  pic1TextEt, pic2TextEt, pic3TextEt;
     private ImageView img1, img2, img3, background_img;
     private Bitmap image;
     final private String MY_LOG = "myLog";
     private String friends;
+    private List<String> friendsList;
     private Map<String, String> friendsMap;
-    private JSONArray friendsList;
+    private JSONArray friendsJsonList;
     private Drawable et_original_background;
+    private ArrayAdapter<String> adapter;
 
 
     @Override
@@ -74,24 +69,27 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         friendsMap=new HashMap<String,String>();
+        friendsList=new ArrayList<>();
         background_img= (ImageView) findViewById(R.id.share_background_img);
 //        Glide.with(this).load(R.drawable.background_1_plus_1).into(background_img);
-        getUserFriends();
+
         inputRow = (TableRow) findViewById(R.id.input_row);
         shareTv = (TextView) findViewById(R.id.toolbar_share_btn);
-        pic1UrlEt = (EditText) findViewById(R.id.img_1_url_et);
+        pic1UrlEt = (AutoCompleteTextView) findViewById(R.id.img_1_url_et);
+
         pic1TextEt = (EditText) findViewById(R.id.img_1_txt_et);
         et_original_background = pic1TextEt.getBackground();
         img1 = (ImageView) findViewById(R.id.img_1);
-        pic2UrlEt = (EditText) findViewById(R.id.img_2_url_et);
+        pic2UrlEt = (AutoCompleteTextView) findViewById(R.id.img_2_url_et);
         pic2TextEt = (EditText) findViewById(R.id.img_2_txt_et);
         img2 = (ImageView) findViewById(R.id.img_2);
-        pic3UrlEt = (EditText) findViewById(R.id.img_3_url_et);
+        pic3UrlEt = (AutoCompleteTextView) findViewById(R.id.img_3_url_et);
         pic3TextEt = (EditText) findViewById(R.id.img_3_txt_et);
         img3 = (ImageView) findViewById(R.id.img_3);
         pic1UrlEt.setOnFocusChangeListener(this);
         pic2UrlEt.setOnFocusChangeListener(this);
         pic3UrlEt.setOnFocusChangeListener(this);
+        getUserFriends();
         profile = Profile.getCurrentProfile();
         shareTv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,14 +104,19 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
         Intent callingIntent=getIntent();
         if (callingIntent!=null){
             try {
-                friendsList=new JSONArray(callingIntent.getStringExtra("friendsList"));
-                Log.i(MY_LOG,"ShareActivity,getUserFriends friends="+friendsList.toString());
+                Log.i(MY_LOG, ""+callingIntent.hasExtra("friendsJsonList"));
+                friendsJsonList =new JSONArray(callingIntent.getStringExtra("friendsJsonList"));
+                Log.i(MY_LOG, "ShareActivity,getUserFriends friends=" + friendsJsonList.toString());
                 JSONObject tempFriendObj=new JSONObject();
-                for(int i=0;i<friendsList.length(); i++){
-                    tempFriendObj= (JSONObject) friendsList.get(i);
+                for(int i=0;i< friendsJsonList.length(); i++){
+                    tempFriendObj= (JSONObject) friendsJsonList.get(i);
+                    friendsList.add(tempFriendObj.getString("name").trim().toLowerCase());
                     friendsMap.put(tempFriendObj.getString("name").trim().toLowerCase(), tempFriendObj.getString("id"));
                 }
-//                Log.i(MY_LOG,"ShareActivity,getUserFriends friend id="+friendsMap.get("Chen App"));
+                adapter=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, friendsList);
+                pic1UrlEt.setAdapter(adapter);
+                pic2UrlEt.setAdapter(adapter);
+                pic3UrlEt.setAdapter(adapter);
             } catch (JSONException e) {
                 Log.e(MY_LOG, "JSON error", e);
             }
@@ -180,7 +183,7 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
     }
 
     private void removeViews() {
-        pic1UrlEt.requestFocus();
+//        pic1UrlEt.requestFocus();
         toolbar.setVisibility(View.GONE);
         inputRow.setVisibility(View.GONE);
         checkTextTv(pic1TextEt);

@@ -96,19 +96,14 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton = (LoginButton) findViewById(R.id.login_button);
         loginButton.setReadPermissions("user_friends");
-//        loginButton.setPublishPermissions("publish_actions");
         callbackManager = CallbackManager.Factory.create();
         loginManagerCallback = CallbackManager.Factory.create();
-//        loginManager.logInWithPublishPermissions(
-//                LoginActivity.this,
-//                Arrays.asList("publish_actions"));
+
         loginManager.registerCallback(loginManagerCallback, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 isJustLoggedIn = true;
                 Log.i(MY_LOG, "on login manager success");
-//                getFriends();
-//                new UserFriendsRequestTask().execute(AccessToken.getCurrentAccessToken());
             }
 
             @Override
@@ -136,36 +131,7 @@ public class LoginActivity extends AppCompatActivity {
                     accessToken = loginResult.getAccessToken();
                     profile = Profile.getCurrentProfile();
                     getFriends(accessToken);
-//                    new UserFriendsRequestTask().execute(accessToken);
                 }
-
-
-//                AccessToken accessToken = loginResult.getAccessToken();
-//                profile = Profile.getCurrentProfile();
-//                getFriends();
-//                new UserFriendsRequestTask().execute(accessToken);
-//                new GraphRequest(
-//                        accessToken,
-//                        "/me/friends",
-//                        null,
-//                        HttpMethod.GET,
-//                        new GraphRequest.Callback() {
-//                            public void onCompleted(GraphResponse response) {
-//
-//                                try {
-//                                    JSONArray friendsList = response.getJSONObject().getJSONArray("data");
-//                                    friends=friendsList.toString();
-//                                    Log.i(MY_LOG, friends);
-//
-//                                } catch (JSONException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        }
-//                ).executeAsync();
-//                Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
-//                intent.putExtra("friendsList", friends);
-//                startActivity(intent);
             }
 
             @Override
@@ -192,7 +158,7 @@ public class LoginActivity extends AppCompatActivity {
                 Log.i(MY_LOG, "getFriends response=" + response.toString());
                 Log.i(MY_LOG, "getFriends JSONArray objects=" + objects.toString());
                 Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
-                intent.putExtra("friendsList", objects.toString());
+                intent.putExtra("friendsJsonList", objects.toString());
                 startActivity(intent);
             }
         }).executeAsync();
@@ -207,11 +173,6 @@ public class LoginActivity extends AppCompatActivity {
             openAlreadyLoggedDialog();
         }
 
-    }
-
-    private boolean isLoggedIn() {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        return accessToken != null;
     }
 
     @Override
@@ -243,7 +204,6 @@ public class LoginActivity extends AppCompatActivity {
             Log.i(MY_LOG, "profile null");
         }
 
-//        new PictureLoaderTask().execute(profilePictureUri);
         Button ok = (Button) dialog.findViewById(R.id.ok_button);
         Button cancel = (Button) dialog.findViewById(R.id.cancel_button);
         ok.setOnClickListener(new View.OnClickListener() {
@@ -251,7 +211,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 isJustLoggedIn = false;
                 getFriends(accessToken);
-//                new UserFriendsRequestTask().execute(AccessToken.getCurrentAccessToken());
             }
         });
         cancel.setOnClickListener(new View.OnClickListener() {
@@ -262,97 +221,5 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
         dialog.show();
-    }
-
-    private class UserFriendsRequestTask extends AsyncTask<AccessToken, Void, JSONObject> {
-        private JSONObject jsonResponse;
-
-        @Override
-        protected JSONObject doInBackground(AccessToken... params) {
-            Log.i(MY_LOG, "get user friends");
-            GraphRequest request = GraphRequest.newMeRequest(
-                    params[0],
-                    new GraphRequest.GraphJSONObjectCallback() {
-                        @Override
-                        public void onCompleted(
-                                JSONObject object,
-                                GraphResponse response) {
-                            if (object != null) {
-                                Log.i(MY_LOG, "jsonObject=" + object.toString());
-                                jsonResponse = object;
-                            }
-
-                        }
-                    });
-            Bundle parameters = new Bundle();
-            parameters.putString("fields", "friends");
-            request.setParameters(parameters);
-            request.executeAndWait();
-
-
-//            new GraphRequest(
-//                    AccessToken.getCurrentAccessToken(),
-//                    "/me/friends",
-//                    null,
-//                    HttpMethod.GET,
-//                    new GraphRequest.Callback() {
-//                        public void onCompleted(GraphResponse response) {
-//                            graphResponse=response;
-//                        }
-//                    }
-//            ).executeAndWait();
-            return jsonResponse;
-        }
-
-
-        @Override
-        protected void onPostExecute(JSONObject jsonObject) {
-            super.onPostExecute(jsonObject);
-            if (jsonObject != null) {
-//                try {
-//
-//                    friends=jsonObject.getJSONObject("friends").toString();
-//                } catch (JSONException e) {
-//                    Log.e(MY_LOG, "JSON error", e);
-//                }
-//                Log.i(MY_LOG, "friends="+friends);
-                Log.i(MY_LOG, "UserFriendsRequestTask, json object=" + jsonObject.toString());
-                Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
-                intent.putExtra("friendsList", jsonObject.toString());
-                isJustLoggedIn = false;
-                startActivity(intent);
-            }
-        }
-    }
-
-    private class PictureLoaderTask extends AsyncTask<Uri, Void, Bitmap> {
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            super.onPostExecute(bitmap);
-            if (bitmap != null)
-                user_img.setImageBitmap(bitmap);
-            else
-                Log.i(MY_LOG, "bitmap null");
-        }
-
-        @Override
-        protected Bitmap doInBackground(Uri... params) {
-            Bitmap bitmap = null;
-            try {
-                URI path = new URI(params[0].toString());
-                URL picUrl = path.toURL();
-                InputStream inputStream = (InputStream) picUrl.getContent();
-                bitmap = BitmapFactory.decodeStream(inputStream);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return bitmap;
-        }
     }
 }

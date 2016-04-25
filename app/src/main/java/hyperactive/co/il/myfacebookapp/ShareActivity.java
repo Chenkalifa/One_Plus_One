@@ -48,6 +48,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ShareActivity extends AppCompatActivity implements View.OnFocusChangeListener {
@@ -60,8 +62,10 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
     private Bitmap image;
     final private String MY_LOG = "myLog";
     private String friends;
-    private JSONObject friendsList;
+    private Map<String, String> friendsMap;
+    private JSONArray friendsList;
     private Drawable et_original_background;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,10 +73,10 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
         setContentView(R.layout.activity_share);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        friendsMap=new HashMap<String,String>();
         background_img= (ImageView) findViewById(R.id.share_background_img);
 //        Glide.with(this).load(R.drawable.background_1_plus_1).into(background_img);
-//        getUserFriends();
+        getUserFriends();
         inputRow = (TableRow) findViewById(R.id.input_row);
         shareTv = (TextView) findViewById(R.id.toolbar_share_btn);
         pic1UrlEt = (EditText) findViewById(R.id.img_1_url_et);
@@ -98,25 +102,34 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
         });
     }
 
-//    private void getUserFriends() {
-//        Intent callingIntent=getIntent();
-//        if (callingIntent!=null){
-//            try {
-//                friendsList=new JSONObject(callingIntent.getStringExtra("friendsList"));
-//                Log.i(MY_LOG,friendsList.toString());
-//            } catch (JSONException e) {
-//                Log.e(MY_LOG, "JSON error", e);
-//            }
-//        }
-//    }
+    private void getUserFriends() {
+        Intent callingIntent=getIntent();
+        if (callingIntent!=null){
+            try {
+                friendsList=new JSONArray(callingIntent.getStringExtra("friendsList"));
+                Log.i(MY_LOG,"ShareActivity,getUserFriends friends="+friendsList.toString());
+                JSONObject tempFriendObj=new JSONObject();
+                for(int i=0;i<friendsList.length(); i++){
+                    tempFriendObj= (JSONObject) friendsList.get(i);
+                    friendsMap.put(tempFriendObj.getString("name").trim().toLowerCase(), tempFriendObj.getString("id"));
+                }
+//                Log.i(MY_LOG,"ShareActivity,getUserFriends friend id="+friendsMap.get("Chen App"));
+            } catch (JSONException e) {
+                Log.e(MY_LOG, "JSON error", e);
+            }
+        }
+    }
 
     private void postPicture() {
         Log.i("myLog", "in post picture");
         //save the screenshot
         removeViews();
         final View rootView = findViewById(R.id.activity_share_layout);//findViewById(android.R.id.content).getRootView()
-        rootView.setDrawingCacheEnabled(true);
-//        image = Bitmap.createBitmap(rootView.getDrawingCache());
+//        rootView.setDrawingCacheEnabled(true);
+        rootView.buildDrawingCache(true);
+        image = rootView.getDrawingCache(true).copy(Bitmap.Config.RGB_565, false);
+//        image = rootView.getDrawingCache();
+        rootView.destroyDrawingCache();
 
 
         //share dialog
@@ -130,8 +143,8 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
             @Override
             public void onClick(View v) {
                 //share the image to Facebook
-                SharePhoto photo = new SharePhoto.Builder().setBitmap(Bitmap.createBitmap(rootView.getDrawingCache())).build();
-                rootView.destroyDrawingCache();
+                SharePhoto photo = new SharePhoto.Builder().setBitmap(image).build();
+
                 SharePhotoContent content = new SharePhotoContent.Builder().addPhoto(photo).build();
                 returnViews();
                 ShareApi.share(content, new FacebookCallback<Sharer.Result>() {
@@ -149,7 +162,7 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
 
                     @Override
                     public void onError(FacebookException error) {
-                        Log.i(MY_LOG, "share error");
+                        Log.e(MY_LOG, "share error", error);
                         Toast.makeText(ShareActivity.this, R.string.share_error_msg, Toast.LENGTH_LONG).show();
                     }
                 });
@@ -216,7 +229,8 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
     private void getPicture(EditText picUrlEt, ImageView image) {
 
         try {
-            Glide.with(this).load(new URL(picUrlEt.getText().toString())).into(image);
+            String picURL=checkIsInputAFriend(picUrlEt);
+            Glide.with(this).load(new URL(picURL)).into(image);
             image.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             picUrlEt.setWidth(80);
             picUrlEt.setText("");
@@ -224,6 +238,14 @@ public class ShareActivity extends AppCompatActivity implements View.OnFocusChan
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+    }
+
+    private String checkIsInputAFriend(EditText picUrlEt) {
+        String input=picUrlEt.getText().toString().trim().toLowerCase();
+        if(friendsMap.containsKey(input))
+            input="https://graph.facebook.com/"+friendsMap.get(input)+"/picture?type=normal";
+        Log.i(MY_LOG, "input="+input);
+        return input;
     }
 
 

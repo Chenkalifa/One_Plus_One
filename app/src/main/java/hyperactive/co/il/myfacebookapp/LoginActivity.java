@@ -59,13 +59,17 @@ import java.util.Arrays;
 public class LoginActivity extends AppCompatActivity {
     private LoginButton loginButton;
     private LoginManager loginManager;
-    private CallbackManager callbackManager;
+    private CallbackManager callbackManager, loginManagerCallback;
+    private AccessToken accessToken;
     private AccessTokenTracker accessTokenTracker;
     private ProfileTracker profileTracker;
     private Profile profile;
     private ImageView background_img, user_img;
     private String friends;
+    private boolean isJustLoggedIn = false;
+    private int counter = 0;
     final private String MY_LOG = "myLog";
+//    public static Facebook facebook = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,20 +93,57 @@ public class LoginActivity extends AppCompatActivity {
         profileTracker.startTracking();
         accessTokenTracker.startTracking();
         loginManager = LoginManager.getInstance();
+
         loginButton = (LoginButton) findViewById(R.id.login_button);
-//        loginButton.setReadPermissions("user_friends");
-        loginButton.setPublishPermissions("publish_actions");
+        loginButton.setReadPermissions("user_friends");
+//        loginButton.setPublishPermissions("publish_actions");
         callbackManager = CallbackManager.Factory.create();
+        loginManagerCallback = CallbackManager.Factory.create();
+//        loginManager.logInWithPublishPermissions(
+//                LoginActivity.this,
+//                Arrays.asList("publish_actions"));
+        loginManager.registerCallback(loginManagerCallback, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                isJustLoggedIn = true;
+                Log.i(MY_LOG, "on login manager success");
+//                getFriends();
+//                new UserFriendsRequestTask().execute(AccessToken.getCurrentAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Log.i(MY_LOG, "cancel");
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.e(MY_LOG, "error", error);
+                Toast.makeText(LoginActivity.this, error.toString(), Toast.LENGTH_LONG).show();
+            }
+        });
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.i(MY_LOG, "success");
-                AccessToken accessToken = loginResult.getAccessToken();
-                profile = Profile.getCurrentProfile();
-                new UserFriendsRequestTask().execute(accessToken);
-//                LoginManager.getInstance().logInWithPublishPermissions(
-//                        LoginActivity.this,
-//                        Arrays.asList("publish_actions"));
+                isJustLoggedIn = true;
+                if (counter == 0) {
+                    loginManager.logInWithPublishPermissions(
+                            LoginActivity.this,
+                            Arrays.asList("publish_actions"));
+                    counter++;
+                } else {
+                    accessToken = loginResult.getAccessToken();
+                    profile = Profile.getCurrentProfile();
+                    getFriends(accessToken);
+//                    new UserFriendsRequestTask().execute(accessToken);
+                }
+
+
+//                AccessToken accessToken = loginResult.getAccessToken();
+//                profile = Profile.getCurrentProfile();
+//                getFriends();
+//                new UserFriendsRequestTask().execute(accessToken);
 //                new GraphRequest(
 //                        accessToken,
 //                        "/me/friends",
@@ -140,12 +181,29 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void getFriends(AccessToken accessToken) {
+        if (accessToken==null)
+            accessToken=AccessToken.getCurrentAccessToken();
+        isJustLoggedIn = false;
+        GraphRequest.newMyFriendsRequest(accessToken, new GraphRequest.GraphJSONArrayCallback() {
+            @Override
+            public void onCompleted(JSONArray objects, GraphResponse response) {
+
+                Log.i(MY_LOG, "getFriends response=" + response.toString());
+                Log.i(MY_LOG, "getFriends JSONArray objects=" + objects.toString());
+                Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
+                intent.putExtra("friendsList", objects.toString());
+                startActivity(intent);
+            }
+        }).executeAsync();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        profile=Profile.getCurrentProfile();
-        if (profile!=null){
-            Log.i(MY_LOG, "on resume profile="+profile.toString());
+        profile = Profile.getCurrentProfile();
+        if (profile != null && !isJustLoggedIn) {
+            Log.i(MY_LOG, "on resume profile=" + profile.toString());
             openAlreadyLoggedDialog();
         }
 
@@ -160,6 +218,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
+        loginManagerCallback.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -176,7 +235,7 @@ public class LoginActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.login_dialog);
         user_img = (ImageView) dialog.findViewById(R.id.user_img);
         TextView dialogtxt = (TextView) dialog.findViewById(R.id.dialog_txt);
-        if(profile!=null){
+        if (profile != null) {
             dialogtxt.setText(getString(R.string.dialog_msg) + profile.getFirstName() + "\n" + getString(R.string.cuntinue_msg));
             Uri profilePictureUri = profile.getProfilePictureUri(80, 80);
             Glide.with(LoginActivity.this).load(profilePictureUri).into(user_img);
@@ -190,9 +249,9 @@ public class LoginActivity extends AppCompatActivity {
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isJustLoggedIn = false;
+                getFriends(accessToken);
 //                new UserFriendsRequestTask().execute(AccessToken.getCurrentAccessToken());
-                Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
-                startActivity(intent);
             }
         });
         cancel.setOnClickListener(new View.OnClickListener() {
@@ -205,21 +264,22 @@ public class LoginActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private class UserFriendsRequestTask extends AsyncTask<AccessToken, Void, JSONObject>{
-       private JSONObject jsonResponse;
+    private class UserFriendsRequestTask extends AsyncTask<AccessToken, Void, JSONObject> {
+        private JSONObject jsonResponse;
+
         @Override
         protected JSONObject doInBackground(AccessToken... params) {
             Log.i(MY_LOG, "get user friends");
             GraphRequest request = GraphRequest.newMeRequest(
-                    AccessToken.getCurrentAccessToken(),
+                    params[0],
                     new GraphRequest.GraphJSONObjectCallback() {
                         @Override
                         public void onCompleted(
                                 JSONObject object,
                                 GraphResponse response) {
-                            if(object!=null){
-                                Log.i(MY_LOG, "jsonObject="+object.toString());
-                                jsonResponse=object;
+                            if (object != null) {
+                                Log.i(MY_LOG, "jsonObject=" + object.toString());
+                                jsonResponse = object;
                             }
 
                         }
@@ -248,7 +308,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
             super.onPostExecute(jsonObject);
-            if (jsonObject!=null){
+            if (jsonObject != null) {
 //                try {
 //
 //                    friends=jsonObject.getJSONObject("friends").toString();
@@ -256,9 +316,11 @@ public class LoginActivity extends AppCompatActivity {
 //                    Log.e(MY_LOG, "JSON error", e);
 //                }
 //                Log.i(MY_LOG, "friends="+friends);
-                    Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
-                    intent.putExtra("friendsList",  jsonObject.toString());
-                    startActivity(intent);
+                Log.i(MY_LOG, "UserFriendsRequestTask, json object=" + jsonObject.toString());
+                Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
+                intent.putExtra("friendsList", jsonObject.toString());
+                isJustLoggedIn = false;
+                startActivity(intent);
             }
         }
     }

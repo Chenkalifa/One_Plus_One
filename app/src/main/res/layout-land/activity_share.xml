@@ -25,12 +25,6 @@
                     android:background="@drawable/blank_pic"
                     android:layout_height="@dimen/pic_size"
                     android:layout_width="@dimen/pic_size"/>
-                <ProgressBar
-                    android:visibility="invisible"
-                    android:id="@+id/progress_bar_1"
-                    android:layout_centerInParent="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
             </RelativeLayout>
 
             <ImageView
@@ -55,18 +49,18 @@
                 android:layout_width="@dimen/pic_size"/>
         </TableRow>
         <TableRow android:layout_marginTop="10dp">
-            <EditText android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_1_txt_et" android:hint="@string/et_second_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size" />
+            <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_1_txt_et" android:hint="@string/et_second_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size" />
             <TextView />
-            <EditText android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_2_txt_et" android:hint="@string/et_second_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
+            <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_2_txt_et" android:hint="@string/et_second_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
             <TextView />
-            <EditText android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_3_txt_et" android:hint="@string/et_second_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
+            <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_3_txt_et" android:hint="@string/et_second_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
         </TableRow>
         <TableRow android:id="@+id/input_row">
-            <EditText android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_1_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size" />
+            <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_1_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size" />
             <TextView />
-            <EditText android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_2_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
+            <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_2_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
             <TextView />
-            <EditText android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_3_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
+            <EditText android:layout_width="@dimen/pic_size" android:height="@dimen/share_activtiy_tv_height" android:inputType="text" android:maxHeight="@dimen/tv_max_height" android:maxWidth="@dimen/tv_max_width" android:id="@+id/img_3_url_et" android:hint="@string/et_hint" android:gravity="center" android:textSize="@dimen/et_hint_txt_size"/>
         </TableRow>
 
     </TableLayout>
